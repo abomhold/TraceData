@@ -1,0 +1,39 @@
+#!/bin/bash
+#!/bin/bash
+
+# Set the URL and target filename
+RAR_URL="https://github.com/Azure/AzurePublicDataset/raw/master/data/AzureFunctionsInvocationTraceForTwoWeeksJan2021.rar"
+FILENAME="AzureFunctionsInvocationTraceForTwoWeeksJan2021.rar"
+TEMP_FILENAME="${FILENAME}.part"
+
+# Function to check if the file exists and resume download
+download_file() {
+    echo "Checking if ${FILENAME} already exists..."
+
+    if [ -f "$FILENAME" ]; then
+        echo "File ${FILENAME} already exists. Skipping download."
+        return 0
+    fi
+
+    if [ -f "$TEMP_FILENAME" ]; then
+        echo "Resuming incomplete download..."
+    else
+        echo "Starting download..."
+    fi
+
+    # Use curl with resume support (-C -) and show progress
+    curl -L -C - --progress-bar -o "$TEMP_FILENAME" "$RAR_URL"
+
+    # Check if the download was successful
+    if [ $? -eq 0 ]; then
+        mv "$TEMP_FILENAME" "$FILENAME"
+        echo "Download complete: $FILENAME"
+    else
+        echo "Error downloading file."
+        return 1
+    fi
+}
+
+# Run the download function
+download_file
+
